@@ -34,7 +34,7 @@ impl ToString for RawVault {
 impl FromStr for RawVault {
     type Err = VaultError;
     fn from_str(s: &str) -> VResult<RawVault> {
-        let mut lines = s.lines_any();
+        let mut lines = s.lines();
         Ok(RawVault {
             salt: try!(lines.next().unwrap_or_default().from_base64()),
             iv: try!(lines.next().unwrap_or_default().from_base64()),
@@ -46,7 +46,7 @@ impl FromStr for RawVault {
 impl RawVault {
     /// Decrypts the data into a Vault
     pub fn decrypt<T>(&self, password: &str) -> VResult<Vault<T>> where T: VaultObject {
-        let master_key = derive_key(&password, &self.salt);
+        let master_key = derive_key(&password.as_bytes(), &self.salt);
         let decrypted = decrypt(&master_key, &self.iv, &self.data);
 
         Ok(Vault {
@@ -79,7 +79,7 @@ impl<T: VaultObject> Vault<T> {
     pub fn set_password(&mut self, password: &str) {
         let salt = gen_bytes();
         self.key_info = Some(KeyInfo {
-            master_key: derive_key(password, &salt),
+            master_key: derive_key(&password.as_bytes(), &salt),
             salt: salt
         });
     }

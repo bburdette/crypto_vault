@@ -41,7 +41,6 @@ extern crate openssl;
 extern crate rand;
 extern crate rustc_serialize;
 
-#[macro_use] mod macros;
 mod crypto;
 mod vault;
 mod error;
